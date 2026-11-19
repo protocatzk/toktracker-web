@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChartConfiguration } from 'chart.js';
+import type { ChartData, ChartOptions } from '@/types/chart';
 import { computed, onMounted, ref, watch } from 'vue';
 import { apiGet } from '@/api/client';
 import type { AnalyticsData, GroupsResponse, StreamerGroup } from '@/api/types';
@@ -36,7 +36,7 @@ const timeOfDay = computed(() => analytics.value?.time_of_day ?? []);
 
 const timelineLabels = computed(() => timeline.value.map((point) => point.label));
 
-const revenueChart = computed<ChartConfiguration['data']>(() => ({
+const revenueChart = computed<ChartData>(() => ({
   labels: timelineLabels.value,
   datasets: [
     {
@@ -52,7 +52,7 @@ const revenueChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const coinsChart = computed<ChartConfiguration['data']>(() => ({
+const coinsChart = computed<ChartData>(() => ({
   labels: timelineLabels.value,
   datasets: [
     {
@@ -65,7 +65,7 @@ const coinsChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const giftChart = computed<ChartConfiguration['data']>(() => ({
+const giftChart = computed<ChartData>(() => ({
   labels: topGifts.value.slice(0, 8).map((gift) => gift.gift_name),
   datasets: [
     {
@@ -77,7 +77,7 @@ const giftChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const timeOfDayChart = computed<ChartConfiguration['data']>(() => ({
+const timeOfDayChart = computed<ChartData>(() => ({
   labels: timeOfDay.value.map((point) => point.label),
   datasets: [
     {
@@ -90,7 +90,7 @@ const timeOfDayChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const giftChartOptions = computed<ChartConfiguration['options']>(() => ({
+const giftChartOptions = computed<ChartOptions>(() => ({
   cutout: '58%',
   plugins: { legend: { position: 'right' } },
 }));

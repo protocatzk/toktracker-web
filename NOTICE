@@ -12,3 +12,34 @@ unter der MIT-Lizenz verwendet:
   Copyright (c) Proto / protocatzk
 
 Die MIT-Lizenz liegt in der Datei LICENSE.
+
+Third-Party-Bibliotheken
+------------------------
+
+Dieses Projekt nutzt folgende Open-Source-Bibliotheken mit permissiven
+Lizenzen:
+
+- Vue 3, Vue Router, Pinia – MIT
+  https://github.com/vuejs/core
+  https://github.com/vuejs/router
+  https://github.com/vuejs/pinia
+- @vueuse/core – MIT
+  https://github.com/vueuse/vueuse
+- @lucide/vue – ISC
+  https://github.com/lucide-icons/lucide
+- reka-ui – MIT
+  https://github.com/unovue/reka-ui
+- vue-sonner – MIT
+  https://github.com/wobsoriano/vue-sonner
+- ECharts – Apache-2.0
+  https://github.com/apache/echarts
+- vue-echarts – MIT
+  https://github.com/ecomfe/vue-echarts
+- Fastify, @fastify/cookie, @fastify/helmet,
+  @fastify/rate-limit, @fastify/static – MIT
+  https://github.com/fastify/fastify
+- Zod – MIT
+  https://github.com/colinhacks/zod
+
+Die vollständigen Lizenztexte liegen in den jeweiligen Paketen unter
+`node_modules/<paket>/LICENSE`.

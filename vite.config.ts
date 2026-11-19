@@ -13,6 +13,20 @@ export default defineConfig({
   build: {
     outDir: fileURLToPath(new URL('./dist/web', import.meta.url)),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('echarts') || id.includes('zrender')) return 'charts';
+          if (id.includes('reka-ui') || id.includes('@floating-ui')) return 'ui-kit';
+          if (id.includes('@lucide')) return 'icons';
+          if (id.includes('vue-sonner')) return 'toast';
+          if (id.includes('vue') || id.includes('pinia')) return 'vue';
+          return 'vendor';
+        },
+      },
+    },
   },
   server: {
     port: 5173,

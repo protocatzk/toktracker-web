@@ -177,8 +177,28 @@ Die vollständige Modul-/Endpunkt-Matrix und Meilensteine stehen in
 - Login ist rate-limitiert.
 - `data/` und `.env` sind nicht versioniert.
 
+## UI/UX & Vue-3-Features
+
+- **Vue 3.5** mit `<script setup>`, `defineModel`, `useTemplateRef`,
+  `defineAsyncComponent`, `<Transition>`/`<TransitionGroup>`, `Teleport`,
+  Suspense-fähigem Lazy-Loading und Route-basiertem Code-Splitting
+- **@vueuse/core** für `useTransition`, `useEventListener` und reaktive
+  Komfort-Helfer
+- **Reka UI** (MIT) für accessible Dialoge, Dropdowns und Focus-Trap
+- **Lucide** (ISC) als Icon-Set
+- **Sonner** (MIT) für Toasts
+- **ECharts** (Apache-2.0) + **vue-echarts** (MIT) für responsive,
+  theme-fähige Charts
+- Neues **Aurora-Industrial-Designsystem** mit fluiden Tokens, Glas-Panels,
+  Light/Dark-Theme, View-Transitions und Mobile-Bottom-Navigation
+- Command-Palette mit `Strg/⌘ + K`
+- Responsive Shell: Desktop-Sidebar, Mobile-Drawer und Bottom-Nav
+- Barrierefreiheit: Fokus-Ringe, `sr-only`-Labels, Tastatursteuerung,
+  `prefers-reduced-motion`
+
 ## Lizenz & Attribution
 
 MIT. Das visuelle Design-System und die lokalen Fonts sind aus
 [`protocatzk/toktracker`](https://github.com/protocatzk/toktracker)
-übernommen (MIT). Siehe [`NOTICE`](./NOTICE).
+übernommen (MIT). Die verwendeten Drittanbieter-Bibliotheken und ihre
+Lizenzen stehen in [`NOTICE`](./NOTICE).

@@ -1,117 +1,102 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import DashboardView from '@/views/DashboardView.vue';
-import StreamersView from '@/views/StreamersView.vue';
-import LoginView from '@/views/LoginView.vue';
-import ForbiddenView from '@/views/ForbiddenView.vue';
-import NotFoundView from '@/views/NotFoundView.vue';
-import StatsView from '@/views/StatsView.vue';
-import BattlesView from '@/views/BattlesView.vue';
-import GiftsView from '@/views/GiftsView.vue';
-import SystemView from '@/views/SystemView.vue';
-import AccessView from '@/views/AccessView.vue';
-import UsersView from '@/views/UsersView.vue';
-import DonorRadarView from '@/views/DonorRadarView.vue';
-import ChatIntelligenceView from '@/views/ChatIntelligenceView.vue';
-import SiteAnalyticsView from '@/views/SiteAnalyticsView.vue';
-import PublicPanelView from '@/views/PublicPanelView.vue';
-import SettingsView from '@/views/SettingsView.vue';
+
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: LoginView,
+    component: () => import('@/views/LoginView.vue'),
     meta: { title: 'Anmelden', layout: 'blank' },
   },
   {
     path: '/',
     name: 'dashboard',
-    component: DashboardView,
+    component: () => import('@/views/DashboardView.vue'),
     meta: { title: 'Dashboard', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/streamers',
     name: 'streamers',
-    component: StreamersView,
+    component: () => import('@/views/StreamersView.vue'),
     meta: { title: 'Streamer & Gruppen', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/stats',
     name: 'stats',
-    component: StatsView,
+    component: () => import('@/views/StatsView.vue'),
     meta: { title: 'Statistiken', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/battles',
     name: 'battles',
-    component: BattlesView,
+    component: () => import('@/views/BattlesView.vue'),
     meta: { title: 'Battles', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/gifts',
     name: 'gifts',
-    component: GiftsView,
+    component: () => import('@/views/GiftsView.vue'),
     meta: { title: 'Geschenke', requiresAuth: true, permission: 'gifts.book' },
   },
   {
     path: '/donor-radar',
     name: 'donor-radar',
-    component: DonorRadarView,
+    component: () => import('@/views/DonorRadarView.vue'),
     meta: { title: 'Spender-Radar', requiresAuth: true, permission: 'radar.view' },
   },
   {
     path: '/chat-intelligence',
     name: 'chat-intelligence',
-    component: ChatIntelligenceView,
+    component: () => import('@/views/ChatIntelligenceView.vue'),
     meta: { title: 'Chat-Intelligence', requiresAuth: true, permission: 'chatintel.view' },
   },
   {
     path: '/site-analytics',
     name: 'site-analytics',
-    component: SiteAnalyticsView,
+    component: () => import('@/views/SiteAnalyticsView.vue'),
     meta: { title: 'Site-Analytics', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/access',
     name: 'access',
-    component: AccessView,
+    component: () => import('@/views/AccessView.vue'),
     meta: { title: 'Zugriff & Rollen', requiresAuth: true, permission: 'users.manage' },
   },
   {
     path: '/users',
     name: 'users',
-    component: UsersView,
+    component: () => import('@/views/UsersView.vue'),
     meta: { title: 'Lokale Benutzer', requiresAuth: true, permission: 'users.manage' },
   },
   {
     path: '/system',
     name: 'system',
-    component: SystemView,
+    component: () => import('@/views/SystemView.vue'),
     meta: { title: 'System & Worker', requiresAuth: true, permission: 'system.view' },
   },
   {
     path: '/settings',
     name: 'settings',
-    component: SettingsView,
+    component: () => import('@/views/SettingsView.vue'),
     meta: { title: 'Einstellungen', requiresAuth: true, permission: 'settings.manage' },
   },
   {
     path: '/public',
     name: 'public-panel',
-    component: PublicPanelView,
+    component: () => import('@/views/PublicPanelView.vue'),
     meta: { title: 'Public Panel' },
   },
   {
     path: '/forbidden',
     name: 'forbidden',
-    component: ForbiddenView,
+    component: () => import('@/views/ForbiddenView.vue'),
     meta: { title: 'Kein Zugriff', requiresAuth: true },
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: NotFoundView,
+    component: () => import('@/views/NotFoundView.vue'),
     meta: { title: 'Nicht gefunden', layout: 'blank' },
   },
 ];

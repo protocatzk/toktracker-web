@@ -105,6 +105,48 @@ describe('proxy routes', () => {
     await app.close();
   });
 
+  it('caches expensive GET responses and invalidates on writes', async () => {
+    const context = makeTestConfig();
+    contexts.push(context);
+    const fetchMock = vi.fn(async () => jsonResponse({ ok: true }));
+    const app = await buildServer({
+      config: context.cfg,
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    const cookie = await loginCookie(app);
+
+    const first = await app.inject({
+      method: 'GET',
+      url: '/api/analytics?period=24h',
+      headers: { cookie },
+    });
+    const second = await app.inject({
+      method: 'GET',
+      url: '/api/analytics?period=24h',
+      headers: { cookie },
+    });
+
+    expect(first.headers['x-bff-cache']).toBe('MISS');
+    expect(second.headers['x-bff-cache']).toBe('HIT');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await app.inject({
+      method: 'POST',
+      url: '/api/gifts',
+      headers: { cookie, origin: 'http://localhost:5173' },
+      payload: { gift_name: 'Rose' },
+    });
+    await app.inject({
+      method: 'GET',
+      url: '/api/analytics?period=24h',
+      headers: { cookie },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    await app.close();
+  });
+
   it('blocks unknown proxy paths', async () => {
     const context = makeTestConfig();
     contexts.push(context);

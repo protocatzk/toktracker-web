@@ -1,31 +1,19 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 export type ToastType = 'info' | 'success' | 'error';
 
-export interface Toast {
-  id: number;
-  message: string;
-  type: ToastType;
-}
-
-let nextId = 0;
-
 export const useToastStore = defineStore('toast', () => {
-  const toasts = ref<Toast[]>([]);
-
-  function dismiss(id: number): void {
-    toasts.value = toasts.value.filter((toast) => toast.id !== id);
-  }
-
-  function push(message: string, type: ToastType = 'info', timeoutMs = 4500): number {
-    const id = (nextId += 1);
-    toasts.value.push({ id, message, type });
-    if (timeoutMs > 0) {
-      window.setTimeout(() => dismiss(id), timeoutMs);
+  function push(message: string, type: ToastType = 'info', timeoutMs = 4500): void {
+    const options = { duration: timeoutMs };
+    if (type === 'success') {
+      toast.success(message, options);
+    } else if (type === 'error') {
+      toast.error(message, options);
+    } else {
+      toast(message, options);
     }
-    return id;
   }
 
-  return { toasts, push, dismiss };
+  return { push };
 });

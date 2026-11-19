@@ -74,12 +74,44 @@ function sendUpstreamFailure(
   reply.code(502).send({ detail });
 }
 
+interface CacheEntry {
+  expires: number;
+  status: number;
+  headers: Record<string, string>;
+  body: Buffer;
+}
+
+const CACHEABLE_PREFIXES = [
+  '/api/overview',
+  '/api/analytics',
+  '/api/battles',
+  '/api/donor-radar',
+  '/api/chat-intelligence',
+  '/api/site-analytics',
+  '/api/public/',
+  '/api/streamer-groups',
+  '/api/system/status',
+  '/api/system/health',
+];
+
+function cacheTtl(pathname: string): number {
+  if (
+    pathname.includes('/analytics') ||
+    pathname.includes('/donor-radar') ||
+    pathname.includes('/site-analytics')
+  ) {
+    return 90_000;
+  }
+  return 30_000;
+}
+
 export async function registerProxyRoutes(
   app: FastifyInstance,
   cfg: AppConfig,
   options: ProxyOptions = {},
 ): Promise<void> {
   const fetchImpl = options.fetchImpl ?? fetch;
+  const responseCache = new Map<string, CacheEntry>();
 
   app.all('/api/*', async (request, reply) => {
     const user = readSession(request, cfg);
@@ -117,6 +149,25 @@ export async function registerProxyRoutes(
     }
 
     const url = upstreamUrl(cfg, request);
+    const isCacheable =
+      request.method.toUpperCase() === 'GET' &&
+      !requestUrl.pathname.includes('/export') &&
+      CACHEABLE_PREFIXES.some((prefix) => requestUrl.pathname.startsWith(prefix));
+    const cacheKey = `${requestUrl.pathname}${requestUrl.search}`;
+
+    if (isCacheable) {
+      const cached = responseCache.get(cacheKey);
+      if (cached && cached.expires > Date.now()) {
+        reply.header('x-bff-cache', 'HIT');
+        reply.code(cached.status);
+        for (const [name, value] of Object.entries(cached.headers)) reply.header(name, value);
+        return reply.send(cached.body);
+      }
+    } else if (request.method.toUpperCase() !== 'GET' && request.method.toUpperCase() !== 'HEAD') {
+      // Mutationen invalidieren den Read-Through-Cache.
+      responseCache.clear();
+    }
+
     const headers = new Headers();
     const accept = headerValue(request.headers.accept);
     if (accept) headers.set('accept', accept);
@@ -145,7 +196,9 @@ export async function registerProxyRoutes(
       }
 
       reply.code(upstream.status);
-      for (const [name, value] of Object.entries(filterResponseHeaders(upstream))) {
+      reply.header('x-bff-cache', 'MISS');
+      const responseHeaders = filterResponseHeaders(upstream);
+      for (const [name, value] of Object.entries(responseHeaders)) {
         reply.header(name, value);
       }
 
@@ -154,6 +207,18 @@ export async function registerProxyRoutes(
       }
 
       const buffer = Buffer.from(await upstream.arrayBuffer());
+      if (isCacheable && upstream.status === 200) {
+        if (responseCache.size > 150) {
+          const oldest = responseCache.keys().next().value;
+          if (oldest) responseCache.delete(oldest);
+        }
+        responseCache.set(cacheKey, {
+          expires: Date.now() + cacheTtl(requestUrl.pathname),
+          status: upstream.status,
+          headers: responseHeaders,
+          body: buffer,
+        });
+      }
       return reply.send(buffer);
     } catch (error) {
       if (error instanceof Error && error.name === 'TimeoutError') {

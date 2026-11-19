@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { X } from '@lucide/vue';
+import {
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogRoot,
+  DialogTitle,
+} from 'reka-ui';
 
 const props = withDefaults(
   defineProps<{
@@ -12,48 +20,36 @@ const props = withDefaults(
 
 const emit = defineEmits<{ close: [] }>();
 
-function onKey(event: KeyboardEvent): void {
-  if (event.key === 'Escape' && props.open) emit('close');
+function onOpenChange(value: boolean): void {
+  if (!value) emit('close');
 }
-
-watch(
-  () => props.open,
-  (open) => {
-    document.body.style.overflow = open ? 'hidden' : '';
-  },
-  { immediate: true },
-);
-
-onMounted(() => window.addEventListener('keydown', onKey));
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKey);
-  document.body.style.overflow = '';
-});
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="open" class="modal-overlay" @click.self="emit('close')">
-      <div
-        class="modal-dialog"
-        :style="wide ? { maxWidth: '980px' } : undefined"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="title"
+  <DialogRoot :open="props.open" @update:open="onOpenChange">
+    <DialogPortal>
+      <DialogOverlay class="ttw-modal-overlay" />
+      <DialogContent
+        class="ttw-modal-content"
+        :class="{ 'is-wide': props.wide }"
+        @pointer-down-outside="emit('close')"
       >
-        <div class="modal-header">
-          <h3>{{ title }}</h3>
-          <button class="btn-close" type="button" aria-label="Schließen" @click="emit('close')">
-            ×
+        <div class="ttw-modal-header">
+          <div>
+            <DialogTitle class="ttw-modal-title">{{ props.title }}</DialogTitle>
+            <DialogDescription class="sr-only">{{ props.title }}</DialogDescription>
+          </div>
+          <button type="button" class="icon-button" aria-label="Schließen" @click="emit('close')">
+            <X :size="17" />
           </button>
         </div>
-        <div class="modal-body">
+        <div class="ttw-modal-body">
           <slot />
         </div>
-        <div class="modal-footer">
+        <div v-if="$slots.footer" class="ttw-modal-footer">
           <slot name="footer" />
         </div>
-      </div>
-    </div>
-  </Teleport>
+      </DialogContent>
+    </DialogPortal>
+  </DialogRoot>
 </template>

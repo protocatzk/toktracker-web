@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { useToastStore } from '@/stores/toast';
+import { Toaster } from 'vue-sonner';
+import { useThemeStore } from '@/stores/theme';
 
-const toast = useToastStore();
+const theme = useThemeStore();
 </script>
 
 <template>
-  <TransitionGroup name="ttw-toast" tag="div" class="ttw-toast-host" aria-live="polite">
-    <button
-      v-for="entry in toast.toasts"
-      :key="entry.id"
-      type="button"
-      class="ttw-toast"
-      :class="`is-${entry.type}`"
-      @click="toast.dismiss(entry.id)"
-    >
-      <span class="ttw-toast-dot" aria-hidden="true"></span>
-      <span>{{ entry.message }}</span>
-    </button>
-  </TransitionGroup>
+  <Toaster
+    position="bottom-right"
+    :theme="theme.theme"
+    :duration="4500"
+    close-button
+    rich-colors
+    :expand="false"
+    :visible-toasts="4"
+    :toast-options="{ class: 'ttw-sonner-toast' }"
+  />
 </template>

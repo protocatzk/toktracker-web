@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChartConfiguration } from 'chart.js';
+import type { ChartData } from '@/types/chart';
 import { computed, onMounted, ref, watch } from 'vue';
 import { apiGet } from '@/api/client';
 import type { ApiAnalytics, SiteAnalytics } from '@/api/types';
@@ -25,7 +25,7 @@ const periodOptions = [
   { value: 'all', label: 'Gesamt' },
 ];
 
-const viewsChart = computed<ChartConfiguration['data']>(() => ({
+const viewsChart = computed<ChartData>(() => ({
   labels: (site.value?.timeline ?? []).map((point) => point.label),
   datasets: [
     {
@@ -51,7 +51,7 @@ const viewsChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const callsChart = computed<ChartConfiguration['data']>(() => ({
+const callsChart = computed<ChartData>(() => ({
   labels: (api.value?.timeline ?? []).map((point) => point.label),
   datasets: [
     {

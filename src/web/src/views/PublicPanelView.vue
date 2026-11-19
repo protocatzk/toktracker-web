@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChartConfiguration } from 'chart.js';
+import type { ChartData, ChartOptions } from '@/types/chart';
 import { computed, onMounted, ref, watch } from 'vue';
 import { apiGet } from '@/api/client';
 import type {
@@ -47,7 +47,7 @@ const recentGifts = computed(() => overview.value?.recent_gifts ?? []);
 const banner = computed(() => overview.value?.banner);
 const timeline = computed(() => analytics.value?.timeline ?? []);
 
-const revenueChart = computed<ChartConfiguration['data']>(() => ({
+const revenueChart = computed<ChartData>(() => ({
   labels: timeline.value.map((point) => point.label),
   datasets: [
     {
@@ -63,7 +63,7 @@ const revenueChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const giftChart = computed<ChartConfiguration['data']>(() => ({
+const giftChart = computed<ChartData>(() => ({
   labels: (analytics.value?.top_gifts ?? []).slice(0, 8).map((gift) => gift.gift_name),
   datasets: [
     {
@@ -75,7 +75,7 @@ const giftChart = computed<ChartConfiguration['data']>(() => ({
   ],
 }));
 
-const giftChartOptions = computed<ChartConfiguration['options']>(() => ({
+const giftChartOptions = computed<ChartOptions>(() => ({
   cutout: '58%',
   plugins: { legend: { position: 'right' } },
 }));
