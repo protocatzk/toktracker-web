@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
+import SkeletonChart from '@/components/SkeletonChart.vue';
+import SkeletonList from '@/components/SkeletonList.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { downloadFile, apiGet } from '@/api/client';
 import type {
@@ -131,6 +134,7 @@ onMounted(async () => {
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !sessions.length" variant="table" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / CHAT INTELLIGENCE</p>
@@ -221,7 +225,7 @@ onMounted(async () => {
             <div class="section-hint">Häufigste Begriffe in der Session.</div>
           </div>
         </div>
-        <div v-if="detailLoading" class="ttw-empty">Analyse wird geladen…</div>
+        <SkeletonChart v-if="detailLoading" :height="220" />
         <div v-else-if="!(analysis?.words ?? []).length" class="ttw-empty">Keine Wörter.</div>
         <div v-else class="ttw-word-cloud">
           <span
@@ -308,7 +312,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-if="detailLoading" class="ttw-empty">Chatlog wird geladen…</div>
+      <SkeletonList v-if="detailLoading" :rows="8" />
       <div v-else-if="!messages.length" class="ttw-empty">Keine Nachrichten in dieser Session.</div>
       <ul v-else class="ttw-chat-log">
         <li v-for="message in messages" :key="message.id">

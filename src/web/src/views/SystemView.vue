@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import { computed, onMounted, ref } from 'vue';
 import { apiGet, apiPost } from '@/api/client';
 import type { DockerContainer, SystemHealth, SystemStatus } from '@/api/types';
@@ -76,6 +77,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !status" variant="charts" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / SYSTEM</p>

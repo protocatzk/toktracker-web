@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import type { ChartData, ChartOptions } from '@/types/chart';
 import { computed, onMounted, ref, watch } from 'vue';
 import { apiGet } from '@/api/client';
@@ -123,6 +124,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !analytics" variant="charts" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">ANALYTICS / READ-ONLY</p>

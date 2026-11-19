@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
+import SkeletonList from '@/components/SkeletonList.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut } from '@/api/client';
 import type {
@@ -222,6 +224,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !users.length" variant="table" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / ACCESS</p>
@@ -415,7 +418,7 @@ onMounted(load);
     </ModalDialog>
 
     <ModalDialog :open="permissionsOpen" :title="modalTitle" wide @close="permissionsOpen = false">
-      <div v-if="permissionsLoading" class="ttw-empty">Rechte werden geladen…</div>
+      <SkeletonList v-if="permissionsLoading" :rows="6" />
       <div v-else class="ttw-user-form">
         <div class="status-banner info">
           Rolle: {{ permissionsUser ? (auth.roleLabels[permissionsUser.role] ?? permissionsUser.role) : '–' }}

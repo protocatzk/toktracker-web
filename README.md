@@ -192,6 +192,8 @@ Die vollständige Modul-/Endpunkt-Matrix und Meilensteine stehen in
 - Neues **Aurora-Industrial-Designsystem** mit fluiden Tokens, Glas-Panels,
   Light/Dark-Theme, View-Transitions und Mobile-Bottom-Navigation
 - Command-Palette mit `Strg/⌘ + K`
+- Boot-Screen, Top-Route-Progress und vollflächige Skeleton-Seiten für jedes Modul
+- Skeleton-Platzhalter in Tabellen, Charts, Listen und Detail-Modals
 - Responsive Shell: Desktop-Sidebar, Mobile-Drawer und Bottom-Nav
 - Barrierefreiheit: Fokus-Ringe, `sr-only`-Labels, Tastatursteuerung,
   `prefers-reduced-motion`

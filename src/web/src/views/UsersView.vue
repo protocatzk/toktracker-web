@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut } from '@/api/client';
 import type { PublicUser, Role } from '@/api/types';
@@ -187,6 +188,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !users.length" variant="table" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">BFF / IDENTITY</p>

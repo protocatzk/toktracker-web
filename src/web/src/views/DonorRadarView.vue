@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
+import SkeletonList from '@/components/SkeletonList.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ApiError, apiGet, apiPost } from '@/api/client';
 import type {
@@ -179,6 +181,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !data" variant="table" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / DONOR RADAR</p>
@@ -381,7 +384,7 @@ onMounted(load);
       wide
       @close="detailOpen = false"
     >
-      <div v-if="detailLoading" class="ttw-empty">Dossier wird geladen…</div>
+      <SkeletonList v-if="detailLoading" :rows="6" />
       <div v-else-if="detailError" class="status-banner error">{{ detailError }}</div>
       <div v-else-if="detail" class="ttw-detail">
         <div class="summary-bar">

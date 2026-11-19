@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { startRouteLoading, stopRouteLoading } from './progress';
 
 
 const routes: RouteRecordRaw[] = [
@@ -108,6 +109,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
+  startRouteLoading();
   const auth = useAuthStore();
   await auth.ensureLoaded();
 
@@ -124,7 +126,12 @@ router.beforeEach(async (to) => {
 });
 
 router.afterEach((to) => {
+  stopRouteLoading();
   document.title = to.meta.title ? `${to.meta.title} · TokTracker` : 'TokTracker';
+});
+
+router.onError(() => {
+  stopRouteLoading();
 });
 
 export default router;

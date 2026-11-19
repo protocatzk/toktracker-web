@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ApiError, apiGet, apiPost } from '@/api/client';
 import type { DashboardOverview, GiftCatalogItem, GiftCreateResponse } from '@/api/types';
@@ -106,6 +107,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !overview" variant="form" :kpis="0" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / GIFTS</p>

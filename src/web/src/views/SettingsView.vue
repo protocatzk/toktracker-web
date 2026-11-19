@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ApiError, apiGet, apiPost } from '@/api/client';
 import type {
@@ -220,6 +221,7 @@ onMounted(load);
 
 <template>
   <div class="container">
+    <PageLoadingOverlay v-if="loading && !profiles.length" variant="form" :kpis="4" />
     <div class="ttw-page-head">
       <div>
         <p class="ttw-page-eyebrow">TOKTRACKER / CONFIG</p>

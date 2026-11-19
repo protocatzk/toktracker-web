@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import {
   ArrowUpRight,
   Coins,
@@ -14,7 +15,6 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { apiGet } from '@/api/client';
 import type {
-  AnalyticsData,
   DashboardOverview,
   GroupsResponse,
   StreamerGroup,
@@ -25,7 +25,6 @@ import AppButton from '@/components/AppButton.vue';
 import AppCard from '@/components/AppCard.vue';
 import AppEmpty from '@/components/AppEmpty.vue';
 import AppPageHeader from '@/components/AppPageHeader.vue';
-import AppSkeleton from '@/components/AppSkeleton.vue';
 import ChartCanvas from '@/components/ChartCanvas.vue';
 import ProgressRing from '@/components/ProgressRing.vue';
 import SegmentedControl, { type SegmentOption } from '@/components/SegmentedControl.vue';
@@ -39,16 +38,13 @@ const period = ref('24h');
 const groupId = ref('');
 const groups = ref<StreamerGroup[]>([]);
 const data = ref<DashboardOverview | null>(null);
-const analytics = ref<AnalyticsData | null>(null);
 const loading = ref(false);
-const analyticsLoading = ref(false);
 const error = ref('');
 const lastUpdated = ref<Date | null>(null);
 const viewMode = ref<ViewMode>('cards');
 const toast = useToastStore();
 
 let refreshTimer: number | undefined;
-let analyticsRequest = 0;
 
 const periodOptions = [
   { value: 'today', label: 'Heute' },
@@ -67,7 +63,6 @@ const totals = computed(() => data.value?.totals ?? {});
 const streamers = computed(() => data.value?.streamers ?? []);
 const recentGifts = computed(() => data.value?.recent_gifts ?? []);
 const system = computed(() => data.value?.system ?? {});
-const timeline = computed(() => analytics.value?.timeline ?? []);
 const uniqueGifters = computed(() =>
   streamers.value.reduce((sum, streamer) => sum + Number(streamer.unique_gifters ?? 0), 0),
 );
@@ -83,29 +78,21 @@ const connectedPercent = computed(() =>
 );
 const stalledPercent = computed(() => (workerTotal.value ? (workerStalled.value / workerTotal.value) * 100 : 0));
 
-const heroChart = computed<ChartData>(() => ({
-  labels: timeline.value.map((point) => point.label),
-  datasets: [
-    {
-      label: 'Netto EUR',
-      data: timeline.value.map((point) => point.eur_net),
-      borderColor: '#4ade80',
-      backgroundColor: '#4ade80',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 0,
-      borderWidth: 2,
-    },
-  ],
-}));
-
-const heroTrend = computed(() => {
-  const points = timeline.value;
-  if (points.length < 2) return undefined;
-  const previous = Number(points[points.length - 2].eur_net) || 0;
-  const current = Number(points[points.length - 1].eur_net) || 0;
-  if (!previous) return undefined;
-  return ((current - previous) / previous) * 100;
+const heroChart = computed<ChartData>(() => {
+  const top = [...streamers.value]
+    .sort((a, b) => Number(b.total_coins ?? 0) - Number(a.total_coins ?? 0))
+    .slice(0, 8);
+  return {
+    labels: top.map((streamer) => streamer.username),
+    datasets: [
+      {
+        label: 'Coins',
+        data: top.map((streamer) => Number(streamer.total_coins ?? 0)),
+        borderColor: '#4ade80',
+        backgroundColor: '#4ade80',
+      },
+    ],
+  };
 });
 
 const maxCoins = computed(() => Math.max(1, ...streamers.value.map((s) => Number(s.total_coins ?? 0))));
@@ -128,29 +115,11 @@ function avatarLetter(streamer: StreamerOverview): string {
   return (streamer.display_name || streamer.username || '?').slice(0, 1).toUpperCase();
 }
 
-async function loadAnalytics(query: string): Promise<void> {
-  const requestId = (analyticsRequest += 1);
-  analyticsLoading.value = true;
-  try {
-    const result = await apiGet<AnalyticsData>(`/api/analytics?${query}`);
-    if (requestId === analyticsRequest) analytics.value = result;
-  } catch {
-    if (requestId === analyticsRequest) analytics.value = null;
-  } finally {
-    if (requestId === analyticsRequest) analyticsLoading.value = false;
-  }
-}
-
 async function load(silent = false): Promise<void> {
   if (!silent) loading.value = true;
   error.value = '';
   const params = new URLSearchParams({ period: period.value });
   if (groupId.value) params.set('group_id', groupId.value);
-  const query = params.toString();
-
-  // Teure Analytics sofort parallel starten, aber das Rendern nicht blockieren.
-  void loadAnalytics(query);
-
   try {
     const [overviewResult, groupsResult] = await Promise.allSettled([
       apiGet<DashboardOverview>(`/api/overview?${params.toString()}`),
@@ -201,6 +170,7 @@ onBeforeUnmount(stopTimer);
 
 <template>
   <div class="container ui-page">
+    <PageLoadingOverlay v-if="!data && loading" variant="charts" :kpis="4" />
     <AppPageHeader
       eyebrow="LIVE EARNINGS / OVERVIEW"
       title="Dashboard"
@@ -237,18 +207,12 @@ onBeforeUnmount(stopTimer);
 
     <div v-if="error" class="status-banner error">{{ error }}</div>
 
-    <div v-if="!data && loading" class="ui-kpi-grid">
-      <AppSkeleton v-for="index in 4" :key="index" height="118px" radius="18px" />
-    </div>
-
-    <template v-else>
+    <template v-if="data">
       <section class="dash-hero">
         <div class="dash-hero-main">
           <div class="dash-hero-top">
             <span class="ui-eyebrow">NETTO CREATOR-AUSZAHLUNG</span>
-            <span v-if="heroTrend !== undefined" class="ui-trend" :class="heroTrend >= 0 ? 'is-up' : 'is-down'">
-              {{ heroTrend >= 0 ? '+' : '' }}{{ heroTrend.toFixed(1) }}%
-            </span>
+            <span class="ui-badge ui-badge--success">TOP STREAMER</span>
           </div>
 
           <div class="dash-hero-value">
@@ -262,15 +226,12 @@ onBeforeUnmount(stopTimer);
             <span>{{ fmtNum(totals.gift_events_count) }} Events</span>
           </div>
 
-          <div v-if="analyticsLoading && !timeline.length" class="dash-hero-chart">
-            <AppSkeleton height="150px" radius="14px" />
-            <span class="dash-chart-loading mono">Verlauf wird geladen…</span>
-          </div>
-          <div v-else-if="timeline.length" class="dash-hero-chart">
-            <ChartCanvas type="line" :data="heroChart" :height="150" />
+          <div v-if="streamers.length" class="dash-hero-chart">
+            <div class="dash-chart-label mono">Top Streamer nach Coins</div>
+            <ChartCanvas type="bar" :data="heroChart" :height="150" />
           </div>
           <div v-else class="dash-hero-chart dash-hero-chart--empty">
-            Kein Zeitverlauf für diesen Zeitraum.
+            Noch keine Streamer-Daten für diesen Zeitraum.
           </div>
 
           <div class="dash-hero-footer">
