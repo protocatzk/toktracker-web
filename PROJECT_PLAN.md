@@ -130,6 +130,9 @@ Zusätzlich lokale BFF-Benutzer unter `/users`.
 `POST /api/donor-radar/donors/:username/crm`,
 `POST /api/donor-radar/donors/:username/toggle-vip` – ✅
 
+Die Loyalty-/Overlap-Analyse ist serverseitig sehr teuer und wird deshalb
+bewusst **auf Knopfdruck** geladen, statt den Radar beim Öffnen zu blockieren.
+
 ### 5.5 Chat Intelligence (`/chat-intelligence`)
 
 `GET /api/chat-intelligence/sessions`, `/analysis`, `/export`,
@@ -137,16 +140,30 @@ Zusätzlich lokale BFF-Benutzer unter `/users`.
 
 ### 5.6 Site Analytics (`/site-analytics`)
 
-`GET /api/site-analytics`, `/api-calls` – ✅
+`GET /api/site-analytics`, `/api-calls` – ✅  
+Zusätzlich im UI: Bot-Sessions, Login-Challenges, TikTok-Worker und
+Telegram-Diagnostics.
 
 ### 5.7 Public Panel (`/public`)
 
 `GET /api/public/overview`, `/streamers/:id`, `/battles`, `/battles/stats`,
 `/analytics` – ✅  
 Die Route ist im Frontend ohne Login erreichbar; der BFF erlaubt die
-Public-Endpunkte ohne Session.
+Public-Endpunkte ohne Session. Streamer-Zeilen öffnen ein öffentliches
+Detail-Modal.
 
-### 5.8 Telegram Mini-App
+### 5.8 Live (`/live`)
+
+`GET /api/live` – ✅  
+Öffentliche Live-Liste mit Viewer-Zahlen, Tracking-Status und TikTok-Link.
+
+### 5.9 Reports (`/reports`)
+
+`GET /api/v1/reports/daily`, `GET /api/v1/streamers/{id}/report`,
+`POST /api/v1/telegram/send-report` – ✅  
+Tagesreport, Markdown-Vorschau, Streamer-Einzelreport und Telegram-Versand.
+
+### 5.10 Telegram Mini-App
 
 Nicht Bestandteil der ersten Parität: Legacy, eingefroren, eigene
 `initData`-Authentifizierung. Optional als responsive PWA neu bauen.

@@ -92,6 +92,9 @@ const CACHEABLE_PREFIXES = [
   '/api/streamer-groups',
   '/api/system/status',
   '/api/system/health',
+  '/api/v1/reports',
+  '/api/streamers/',
+  '/api/v1/streamers/',
 ];
 
 function cacheTtl(pathname: string): number {

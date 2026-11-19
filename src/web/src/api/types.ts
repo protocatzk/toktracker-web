@@ -307,6 +307,178 @@ export interface PublicOverview {
   } | null;
 }
 
+export interface LiveStreamer {
+  id: number;
+  username: string;
+  display_name?: string;
+  avatar_url?: string | null;
+  is_live: boolean | number;
+  is_tracking: boolean | number;
+  auto_monitor: boolean | number;
+  current_viewers?: number;
+  last_seen_at?: string | null;
+}
+
+export interface LiveResponse {
+  count: number;
+  generated_at: string;
+  streamers: LiveStreamer[];
+}
+
+export interface ReportTotals {
+  streamers_count?: number;
+  live_count?: number;
+  period_coins?: number;
+  period_eur_net?: number;
+  period_usd_net?: number;
+  period_eur_gross?: number;
+  period_usd_gross?: number;
+  period_gifts_sent?: number;
+}
+
+export interface ReportGiftStat {
+  gift_name?: string;
+  total_coins?: number;
+  count?: number;
+}
+
+export interface ReportGifterStat {
+  sender_username?: string;
+  sender_nickname?: string;
+  total_coins?: number;
+}
+
+export interface StreamerReportCard {
+  streamer_id: number;
+  username: string;
+  display_name: string;
+  is_live: boolean;
+  is_tracking_active: boolean;
+  worker_state: string;
+  current_viewers: number;
+  follower_count: number;
+  period_hours: number;
+  period_coins: number;
+  period_gifts_sent: number;
+  period_gift_events: number;
+  period_unique_gifters: number;
+  period_usd_net: number;
+  period_eur_net: number;
+  period_usd_gross: number;
+  period_eur_gross: number;
+  period_sessions_count: number;
+  period_peak_viewers: number;
+  alltime_coins: number;
+  alltime_usd_net: number;
+  alltime_eur_net: number;
+  top_gifts?: ReportGiftStat[];
+  top_gifters?: ReportGifterStat[];
+  telegram_text?: string;
+}
+
+export interface DailyReport {
+  generated_at: string;
+  period_hours: number;
+  cutoff_timestamp: string;
+  currency_primary: string;
+  totals: ReportTotals;
+  streamers: StreamerReportCard[];
+  telegram_markdown: string;
+  telegram_html: string;
+}
+
+export interface PublicGiftBreakdownItem {
+  gift_name?: string;
+  diamond_count?: number;
+  total_quantity?: number;
+  total_coins?: number;
+  usd_net?: number;
+  eur_net?: number;
+  events_count?: number;
+}
+
+export interface PublicGifter {
+  sender_username?: string;
+  sender_nickname?: string;
+  is_super_fan?: boolean;
+  total_coins?: number;
+  gifts_sent?: number;
+  eur_net?: number;
+}
+
+export interface PublicSession {
+  id?: number;
+  started_at?: string;
+  ended_at?: string;
+  status?: string;
+  peak_viewers?: number;
+  diamonds_collected?: number;
+}
+
+export interface PublicStreamerDetail {
+  streamer: StreamerOverview;
+  summary: Record<string, number | string | undefined>;
+  gift_breakdown: PublicGiftBreakdownItem[];
+  top_gifters: PublicGifter[];
+  sessions: PublicSession[];
+}
+
+export interface SiteBotSession {
+  id: number;
+  session_type?: string;
+  telegram_id?: number | null;
+  username?: string | null;
+  first_name?: string | null;
+  client_ip_hash?: string;
+  status?: string;
+  details_json?: string;
+  created_at?: string;
+  last_active_at?: string;
+}
+
+export interface SiteChallenge {
+  challenge_id?: string;
+  created_at?: string;
+  expires_at?: string;
+  status?: string;
+  attempts?: number;
+  admin_label?: string;
+  client_info?: string;
+  code?: string;
+}
+
+export interface SiteTikTokWorker {
+  id: number;
+  username: string;
+  display_name?: string;
+  avatar_url?: string | null;
+  is_live?: boolean | number;
+  is_monitoring?: boolean;
+  status?: string;
+  connected_since?: string | null;
+  total_diamonds?: number;
+  gifts_received_session?: number;
+  reconnect_count?: number;
+  last_seen_live?: string | null;
+  last_error?: string;
+}
+
+export interface TelegramDiagnostics {
+  state?: string;
+  bot_username?: string;
+  access_mode?: string;
+  allowed_users_count?: number;
+  pending_users_count?: number;
+  last_report_sent_at?: string;
+  last_error?: string;
+  has_token?: boolean;
+  sdk_available?: boolean;
+  group_support?: boolean;
+  default_chat_id?: string | number | null;
+  logs?: string[];
+  [key: string]: unknown;
+}
+
 export interface SiteAnalyticsKpis {
   total_views?: number;
   unique_visitors?: number;
@@ -345,12 +517,12 @@ export interface SiteAnalytics {
     response_time_ms?: number;
     created_at?: string;
   }>;
-  bot_sessions: Array<Record<string, unknown>>;
-  telegram_users?: Array<Record<string, unknown>>;
+  bot_sessions: SiteBotSession[];
+  telegram_users?: TelegramUser[];
   api_analytics?: ApiAnalytics;
-  tiktok_workers?: Array<Record<string, unknown>>;
-  recent_challenges?: Array<Record<string, unknown>>;
-  telegram_diagnostics?: Record<string, unknown>;
+  tiktok_workers?: SiteTikTokWorker[];
+  recent_challenges?: SiteChallenge[];
+  telegram_diagnostics?: TelegramDiagnostics;
 }
 
 export interface ApiAnalyticsKpis {
@@ -621,11 +793,41 @@ export interface Frontenwechsler {
   to_streamer?: Record<string, unknown>;
 }
 
+export interface OverlapSharedDonor {
+  username?: string;
+  display_name?: string;
+  total_coins?: number;
+  coins?: number;
+  is_vip?: boolean;
+  tier?: string;
+}
+
+export interface OverlapEntry {
+  s1_id?: number;
+  s2_id?: number;
+  streamer_a_username?: string;
+  streamer_a_display_name?: string;
+  streamer_a_avatar?: string;
+  streamer_b_username?: string;
+  streamer_b_display_name?: string;
+  streamer_b_avatar?: string;
+  shared_donors_count?: number;
+  total_coins_a?: number;
+  total_coins_b?: number;
+  total_shared_coins?: number;
+  streamer_a_pct?: number;
+  streamer_b_pct?: number;
+  shared_volume_eur?: number;
+  top_donors?: OverlapSharedDonor[];
+  top_shared_donors?: OverlapSharedDonor[];
+  [key: string]: unknown;
+}
+
 export interface LoyaltyOverlapResponse {
   ok: boolean;
   data: {
     frontenwechsler: Frontenwechsler[];
-    overlap_matrix: Array<Record<string, unknown>>;
+    overlap_matrix: OverlapEntry[];
     days_recent: number;
     summary: Record<string, unknown>;
   };

@@ -17,6 +17,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Dashboard', requiresAuth: true, permission: 'analytics.view' },
   },
   {
+    path: '/live',
+    name: 'live',
+    component: () => import('@/views/LiveView.vue'),
+    meta: { title: 'Live' },
+  },
+  {
     path: '/streamers',
     name: 'streamers',
     component: () => import('@/views/StreamersView.vue'),
@@ -69,6 +75,12 @@ const routes: RouteRecordRaw[] = [
     name: 'users',
     component: () => import('@/views/UsersView.vue'),
     meta: { title: 'Lokale Benutzer', requiresAuth: true, permission: 'users.manage' },
+  },
+  {
+    path: '/reports',
+    name: 'reports',
+    component: () => import('@/views/ReportsView.vue'),
+    meta: { title: 'Reports', requiresAuth: true, permission: 'analytics.view' },
   },
   {
     path: '/system',

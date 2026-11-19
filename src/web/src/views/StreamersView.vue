@@ -55,7 +55,7 @@ interface StreamerDetail {
 const auth = useAuthStore();
 const toast = useToastStore();
 
-const period = ref('all');
+const period = ref('24h');
 const overview = ref<DashboardOverview | null>(null);
 const groups = ref<StreamerGroup[]>([]);
 const loading = ref(false);
@@ -198,9 +198,16 @@ async function openDetail(streamer: StreamerOverview): Promise<void> {
   try {
     detail.value = await apiGet<StreamerDetail>(
       `/api/streamers/${streamer.id}?period=${encodeURIComponent(period.value)}`,
+      { signal: AbortSignal.timeout(25_000) },
     );
   } catch (caught) {
-    detailError.value = caught instanceof Error ? caught.message : 'Details konnten nicht geladen werden.';
+    const timeout =
+      caught instanceof DOMException && (caught.name === 'TimeoutError' || caught.name === 'AbortError');
+    detailError.value = timeout
+      ? 'Die Detail-Abfrage dauert zu lange. Bitte einen kürzeren Zeitraum wählen.'
+      : caught instanceof Error
+        ? caught.message
+        : 'Details konnten nicht geladen werden.';
   } finally {
     detailLoading.value = false;
   }
@@ -660,6 +667,31 @@ onMounted(load);
                 <td>{{ session.status || '–' }}</td>
                 <td class="num-col mono">{{ fmtNum(session.peak_viewers) }}</td>
                 <td class="num-col mono">{{ fmtNum(session.diamonds_collected) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="ttw-detail-title">Letzte Events</h3>
+        <div v-if="!detail.recent_events.length" class="ttw-empty">Keine Events vorhanden.</div>
+        <div v-else class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Zeit</th>
+                <th>Spender</th>
+                <th>Geschenk</th>
+                <th class="num-col">Coins</th>
+                <th class="num-col">EUR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="event in detail.recent_events.slice(0, 25)" :key="event.id">
+                <td class="mono">{{ fmtDate(event.created_at) }}</td>
+                <td>{{ event.sender_nickname || event.sender_username || '–' }}</td>
+                <td>{{ event.gift_name }}</td>
+                <td class="num-col mono">{{ fmtNum(event.total_coins) }}</td>
+                <td class="num-col mono">{{ fmtEUR(event.eur_net) }}</td>
               </tr>
             </tbody>
           </table>

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import PageLoadingOverlay from '@/components/PageLoadingOverlay.vue';
 import SkeletonList from '@/components/SkeletonList.vue';
+import SkeletonTable from '@/components/SkeletonTable.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ApiError, apiGet, apiPost } from '@/api/client';
 import type {
   Frontenwechsler,
   LoyaltyOverlapResponse,
+  OverlapEntry,
   RadarDonor,
   RadarDonorDetail,
   RadarResponse,
@@ -31,6 +33,9 @@ const offset = ref(0);
 const data = ref<RadarResponse['data'] | null>(null);
 const alerts = ref<WhaleAlert[]>([]);
 const frontenwechsler = ref<Frontenwechsler[]>([]);
+const overlapMatrix = ref<OverlapEntry[]>([]);
+const loyaltyLoading = ref(false);
+const loyaltyError = ref('');
 const loading = ref(false);
 const error = ref('');
 
@@ -84,18 +89,35 @@ async function load(): Promise<void> {
     if (vipOnly.value) params.set('vip_only', 'true');
     if (crossOnly.value) params.set('cross_streamer_only', 'true');
 
-    const [radarPayload, alertPayload, loyaltyPayload] = await Promise.all([
+    const [radarPayload, alertPayload] = await Promise.all([
       apiGet<RadarResponse>(`/api/donor-radar?${params.toString()}`),
       apiGet<WhaleAlertsResponse>('/api/donor-radar/whale-alerts?min_coins=1000&limit=8'),
-      apiGet<LoyaltyOverlapResponse>('/api/donor-radar/loyalty-and-overlap?min_coins=50&days_recent=14'),
     ]);
     data.value = radarPayload.data;
     alerts.value = alertPayload.alerts;
-    frontenwechsler.value = loyaltyPayload.data.frontenwechsler;
   } catch (caught) {
     error.value = caught instanceof Error ? caught.message : 'Spender-Radar konnte nicht geladen werden.';
   } finally {
     loading.value = false;
+  }
+}
+
+async function loadLoyalty(): Promise<void> {
+  loyaltyLoading.value = true;
+  loyaltyError.value = '';
+  try {
+    const payload = await apiGet<LoyaltyOverlapResponse>(
+      '/api/donor-radar/loyalty-and-overlap?min_coins=50&days_recent=14',
+    );
+    frontenwechsler.value = payload.data.frontenwechsler;
+    overlapMatrix.value = payload.data.overlap_matrix;
+  } catch {
+    // Loyalty/Overlap ist serverseitig teuer und daher optional.
+    frontenwechsler.value = [];
+    overlapMatrix.value = [];
+    loyaltyError.value = 'Loyalty & Overlap sind aktuell nicht verfügbar oder dauern zu lange.';
+  } finally {
+    loyaltyLoading.value = false;
   }
 }
 
@@ -240,10 +262,17 @@ onMounted(load);
           <h2>Frontenwechsler</h2>
           <div class="section-hint">Spender, die zuletzt zwischen Streamern gewechselt sind.</div>
         </div>
-        <span class="status-tag">{{ frontenwechsler.length }} SPENDER</span>
+        <div class="action-group">
+          <span class="status-tag">{{ frontenwechsler.length }} SPENDER</span>
+          <button type="button" class="sm" :disabled="loyaltyLoading" @click="loadLoyalty">
+            {{ loyaltyLoading ? 'Lädt…' : 'Loyalty laden' }}
+          </button>
+        </div>
       </div>
 
-      <div v-if="!frontenwechsler.length" class="ttw-empty">Keine Wechsel im Zeitraum.</div>
+      <div v-if="loyaltyError" class="status-banner warning">{{ loyaltyError }}</div>
+      <SkeletonTable v-if="loyaltyLoading" :rows="4" :columns="5" />
+      <div v-else-if="!frontenwechsler.length" class="ttw-empty">Noch keine Loyalty-Daten geladen.</div>
       <div v-else class="table-wrap table-responsive">
         <table>
           <thead>
@@ -280,6 +309,60 @@ onMounted(load);
       </div>
     </section>
 
+
+    <section class="box">
+      <div class="box-header">
+        <div>
+          <h2>Streamer-Overlap</h2>
+          <div class="section-hint">Gemeinsame Spender und geteiltes Volumen zwischen Streamer-Paaren.</div>
+        </div>
+        <div class="action-group">
+          <span class="status-tag">{{ overlapMatrix.length }} PAARE</span>
+          <button type="button" class="sm" :disabled="loyaltyLoading" @click="loadLoyalty">
+            {{ loyaltyLoading ? 'Lädt…' : 'Overlap laden' }}
+          </button>
+        </div>
+      </div>
+
+      <SkeletonTable v-if="loyaltyLoading" :rows="4" :columns="6" />
+      <div v-else-if="!overlapMatrix.length" class="ttw-empty">Noch keine Overlap-Daten geladen.</div>
+      <div v-else class="table-wrap table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Streamer A</th>
+              <th>Streamer B</th>
+              <th class="num-col">Shared Donors</th>
+              <th class="num-col">Shared Coins</th>
+              <th class="num-col">Shared EUR</th>
+              <th class="num-col">A %</th>
+              <th class="num-col">B %</th>
+              <th>Top Shared</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="entry in overlapMatrix" :key="`${entry.s1_id}-${entry.s2_id}`">
+              <td>@{{ entry.streamer_a_username || '–' }}</td>
+              <td>@{{ entry.streamer_b_username || '–' }}</td>
+              <td class="num-col mono">{{ fmtNum(entry.shared_donors_count) }}</td>
+              <td class="num-col mono">{{ fmtNum(entry.total_shared_coins) }}</td>
+              <td class="num-col mono">{{ fmtEUR(entry.shared_volume_eur) }}</td>
+              <td class="num-col mono">{{ fmtNum(entry.streamer_a_pct) }}%</td>
+              <td class="num-col mono">{{ fmtNum(entry.streamer_b_pct) }}%</td>
+              <td class="mono">
+                {{
+                  (entry.top_shared_donors ?? entry.top_donors ?? [])
+                    .slice(0, 3)
+                    .map((donor) => donor.username)
+                    .filter(Boolean)
+                    .join(', ') || '–'
+                }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
     <section class="box">
       <div class="box-header">
         <div>

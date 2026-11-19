@@ -72,6 +72,23 @@ const callsChart = computed<ChartData>(() => ({
   ],
 }));
 
+const botSessions = computed(() => site.value?.bot_sessions ?? []);
+const challenges = computed(() => site.value?.recent_challenges ?? []);
+const workers = computed(() => site.value?.tiktok_workers ?? []);
+const telegram = computed(() => site.value?.telegram_diagnostics ?? {});
+
+function display(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '–';
+  return String(value);
+}
+
+function statusClass(status?: string): string {
+  const value = String(status ?? '').toLowerCase();
+  if (['approved', 'ok', 'success', 'healthy', 'running', 'connected'].includes(value)) return 'is-live';
+  if (['rejected', 'locked', 'error', 'failed', 'blocked', 'offline', 'stopped'].includes(value)) return 'is-offline';
+  return 'is-tracking';
+}
+
 async function load(): Promise<void> {
   loading.value = true;
   error.value = '';
@@ -346,6 +363,169 @@ onMounted(load);
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="box">
+      <div class="box-header">
+        <div>
+          <h2>Bot-Sessions</h2>
+          <div class="section-hint">Telegram-Logins, Mini-App-Sessions und Bot-Aktionen.</div>
+        </div>
+        <span class="status-tag">{{ botSessions.length }} SESSIONS</span>
+      </div>
+      <div v-if="!botSessions.length" class="ttw-empty">Keine Bot-Sessions.</div>
+      <div v-else class="table-wrap table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Zeit</th>
+              <th>Typ</th>
+              <th>Telegram</th>
+              <th>Status</th>
+              <th>Zuletzt aktiv</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="session in botSessions.slice(0, 25)" :key="session.id">
+              <td class="mono">{{ fmtDate(session.created_at) }}</td>
+              <td class="mono">{{ display(session.session_type) }}</td>
+              <td>
+                {{ display(session.username || session.first_name) }}
+                <span v-if="session.telegram_id" class="mono muted"> · {{ session.telegram_id }}</span>
+              </td>
+              <td>
+                <span class="ttw-status" :class="statusClass(session.status)">
+                  <span class="ttw-status-dot"></span>
+                  {{ display(session.status).toUpperCase() }}
+                </span>
+              </td>
+              <td class="mono">{{ fmtDate(session.last_active_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="box-header">
+        <div>
+          <h2>Login-Challenges</h2>
+          <div class="section-hint">Letzte Telegram-Login-Anfragen. Codes werden nicht angezeigt.</div>
+        </div>
+        <span class="status-tag">{{ challenges.length }} CHALLENGES</span>
+      </div>
+      <div v-if="!challenges.length" class="ttw-empty">Keine Challenges.</div>
+      <div v-else class="table-wrap table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Challenge</th>
+              <th>Anfrage</th>
+              <th>Status</th>
+              <th class="num-col">Versuche</th>
+              <th>Erstellt</th>
+              <th>Läuft ab</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="challenge in challenges.slice(0, 20)" :key="challenge.challenge_id">
+              <td class="mono ttw-ellipsis">{{ display(challenge.challenge_id) }}</td>
+              <td class="mono">{{ display(challenge.client_info || challenge.admin_label) }}</td>
+              <td>
+                <span class="ttw-status" :class="statusClass(challenge.status)">
+                  <span class="ttw-status-dot"></span>
+                  {{ display(challenge.status).toUpperCase() }}
+                </span>
+              </td>
+              <td class="num-col mono">{{ fmtNum(challenge.attempts) }}</td>
+              <td class="mono">{{ fmtDate(challenge.created_at) }}</td>
+              <td class="mono">{{ fmtDate(challenge.expires_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="box-header">
+        <div>
+          <h2>TikTok-Worker</h2>
+          <div class="section-hint">Alle Streamer mit Monitoring-Status und Session-Werten.</div>
+        </div>
+        <span class="status-tag">{{ workers.length }} WORKER</span>
+      </div>
+      <div v-if="!workers.length" class="ttw-empty">Keine Worker-Daten.</div>
+      <div v-else class="table-wrap table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Streamer</th>
+              <th>Status</th>
+              <th class="num-col">Live</th>
+              <th class="num-col">Gifts</th>
+              <th class="num-col">Reconnects</th>
+              <th>Verbunden seit</th>
+              <th>Letzter Fehler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="worker in workers.slice(0, 30)" :key="worker.id">
+              <td>@{{ worker.username }}</td>
+              <td>
+                <span class="ttw-status" :class="statusClass(worker.status)">
+                  <span class="ttw-status-dot"></span>
+                  {{ display(worker.status).toUpperCase() }}
+                </span>
+              </td>
+              <td class="num-col mono">{{ worker.is_live ? 'JA' : '–' }}</td>
+              <td class="num-col mono">{{ fmtNum(worker.gifts_received_session) }}</td>
+              <td class="num-col mono">{{ fmtNum(worker.reconnect_count) }}</td>
+              <td class="mono">{{ fmtDate(worker.connected_since) }}</td>
+              <td class="mono muted">{{ display(worker.last_error) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="box-header">
+        <div>
+          <h2>Telegram-Diagnostics</h2>
+          <div class="section-hint">Bot-Zustand, Whitelist und letzte Meldungen.</div>
+        </div>
+      </div>
+      <dl class="ttw-kv">
+        <div>
+          <dt>Status</dt>
+          <dd>{{ display(telegram.state) }}</dd>
+        </div>
+        <div>
+          <dt>Bot</dt>
+          <dd>{{ telegram.bot_username ? `@${display(telegram.bot_username)}` : '–' }}</dd>
+        </div>
+        <div>
+          <dt>Zugriffsmodus</dt>
+          <dd>{{ display(telegram.access_mode) }}</dd>
+        </div>
+        <div>
+          <dt>Freigegeben</dt>
+          <dd>{{ fmtNum(telegram.allowed_users_count) }}</dd>
+        </div>
+        <div>
+          <dt>Wartend</dt>
+          <dd>{{ fmtNum(telegram.pending_users_count) }}</dd>
+        </div>
+        <div>
+          <dt>Letzter Report</dt>
+          <dd>{{ fmtDate(telegram.last_report_sent_at) }}</dd>
+        </div>
+        <div>
+          <dt>Letzter Fehler</dt>
+          <dd>{{ display(telegram.last_error) }}</dd>
+        </div>
+      </dl>
+      <pre v-if="telegram.logs?.length" class="report-preview report-preview--small">{{ telegram.logs.slice(-8).join('\n') }}</pre>
     </section>
   </div>
 </template>

@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Command,
   Cpu,
+  FileText,
   Gift,
   Globe2,
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
   MessageSquareText,
   Moon,
   Radar,
+  Radio,
   Search,
   Settings,
   ShieldCheck,
@@ -64,6 +66,12 @@ const navSections: NavSection[] = [
         description: 'KPIs, Live-Status und letzte Aktivität',
         icon: LayoutDashboard,
         permission: 'analytics.view',
+      },
+      {
+        name: 'live',
+        label: 'Live',
+        description: 'Aktuell live Streamer',
+        icon: Radio,
       },
       {
         name: 'streamers',
@@ -148,6 +156,13 @@ const navSections: NavSection[] = [
   {
     label: 'System',
     items: [
+      {
+        name: 'reports',
+        label: 'Reports',
+        description: 'Tagesreport und Telegram-Versand',
+        icon: FileText,
+        permission: 'analytics.view',
+      },
       {
         name: 'system',
         label: 'System',

@@ -154,12 +154,16 @@ Endpunkte aufrufen.
 
 - [x] Projektgerüst, BFF, Login, Rollen, Proxy
 - [x] Dashboard-Übersicht (`/api/overview`)
-- [x] Streamer, Gruppen und Worker-Diagnose
+- [x] Live-Übersicht (`/api/live`)
+- [x] Streamer, Gruppen und Worker-Diagnose inkl. letzter Events
 - [x] Analytics/Charts, Stats, Battles und Gifts
+- [x] Reports (`/api/v1/reports/daily`, `/api/v1/streamers/{id}/report`)
 - [x] Telegram-Whitelist, Settings, System und lokale Benutzer
-- [x] Donor-Radar, Chat-Intelligence, Site-Analytics
-- [x] Public Panel (Leaderboard, Battles, Analytics, Gifts, Bot)
-- [x] Exporte und 24h-Report-Versand
+- [x] Donor-Radar inkl. optionaler Loyalty-/Overlap-Analyse
+- [x] Chat-Intelligence und Site-Analytics inkl. Bot-Sessions,
+  Login-Challenges und Worker-Telemetrie
+- [x] Public Panel inkl. Streamer-Detail-Modal
+- [x] Exporte und Telegram-Report-Versand
 - [ ] E2E-Tests und Deployment-Feinschliff
 
 Die **Telegram Mini-App** ist bewusst nicht Teil der ersten Parität: Sie ist

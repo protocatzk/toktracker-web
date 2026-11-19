@@ -9,9 +9,12 @@ import type {
   BattleStats,
   BattlesResponse,
   PublicOverview,
+  PublicStreamerDetail,
   StreamerOverview,
 } from '@/api/types';
 import ChartCanvas from '@/components/ChartCanvas.vue';
+import ModalDialog from '@/components/ModalDialog.vue';
+import SkeletonList from '@/components/SkeletonList.vue';
 import StatCard from '@/components/StatCard.vue';
 import { fmtDate, fmtEUR, fmtNum, fmtUSD } from '@/utils/format';
 
@@ -25,6 +28,11 @@ const battleStats = ref<BattleStats | null>(null);
 const analytics = ref<AnalyticsData | null>(null);
 const loading = ref(false);
 const error = ref('');
+const detailOpen = ref(false);
+const detailLoading = ref(false);
+const detailError = ref('');
+const detail = ref<PublicStreamerDetail | null>(null);
+const detailStreamer = ref<StreamerOverview | null>(null);
 
 const periodOptions = [
   { value: 'today', label: 'Heute' },
@@ -102,6 +110,24 @@ function battleScore(battle: BattleRow): string {
     return `${fmtNum(battle.streamer_a.score)} : ${fmtNum(battle.streamer_b.score)}`;
   }
   return `${fmtNum(battle.streamer_score)} : ${fmtNum(battle.opponent_score)}`;
+}
+
+
+async function openStreamerDetail(streamer: StreamerOverview): Promise<void> {
+  detailStreamer.value = streamer;
+  detail.value = null;
+  detailError.value = '';
+  detailOpen.value = true;
+  detailLoading.value = true;
+  try {
+    detail.value = await apiGet<PublicStreamerDetail>(
+      `/api/public/streamers/${encodeURIComponent(streamer.username)}?period=${encodeURIComponent(period.value)}`,
+    );
+  } catch (caught) {
+    detailError.value = caught instanceof Error ? caught.message : 'Streamer-Details konnten nicht geladen werden.';
+  } finally {
+    detailLoading.value = false;
+  }
 }
 
 async function loadOverview(): Promise<void> {
@@ -247,6 +273,7 @@ onMounted(loadTab);
                 <th class="num-col">Coins</th>
                 <th class="num-col">Netto EUR</th>
                 <th>Top Gift</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -284,6 +311,9 @@ onMounted(loadTab);
                     <span class="mono muted">· {{ fmtNum(streamer.top_gift.coins) }}</span>
                   </span>
                   <span v-else class="muted">–</span>
+                </td>
+                <td>
+                  <button type="button" class="sm" @click="openStreamerDetail(streamer)">Details</button>
                 </td>
               </tr>
             </tbody>
@@ -455,5 +485,113 @@ onMounted(loadTab);
       <span>Brutto USD/Coin: {{ overview.rates.gross_usd_per_coin ?? '–' }}</span>
       <span>USD→EUR: {{ overview.rates.usd_to_eur_rate ?? '–' }}</span>
     </div>
+
+    <ModalDialog
+      :open="detailOpen"
+      :title="detailStreamer ? `@${detailStreamer.username}` : 'Streamer-Details'"
+      wide
+      @close="detailOpen = false"
+    >
+      <SkeletonList v-if="detailLoading" :rows="6" />
+      <div v-else-if="detailError" class="status-banner error">{{ detailError }}</div>
+      <div v-else-if="detail" class="ttw-detail">
+        <div class="summary-bar">
+          <div class="summary-box">
+            <div class="label">Netto</div>
+            <div class="val">{{ fmtEUR(detail.summary.eur_net) }}</div>
+            <div class="sub">{{ fmtUSD(detail.summary.usd_net) }}</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Coins</div>
+            <div class="val">{{ fmtNum(detail.summary.total_coins) }}</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Geschenke</div>
+            <div class="val">{{ fmtNum(detail.summary.total_gifts_sent) }}</div>
+          </div>
+          <div class="summary-box">
+            <div class="label">Sessions</div>
+            <div class="val">{{ fmtNum(detail.sessions.length) }}</div>
+          </div>
+        </div>
+
+        <div class="ttw-detail-grid">
+          <div>
+            <h3 class="ttw-detail-title">Top-Geschenke</h3>
+            <div v-if="!detail.gift_breakdown.length" class="ttw-empty">Keine Daten.</div>
+            <div v-else class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Geschenk</th>
+                    <th class="num-col">Anzahl</th>
+                    <th class="num-col">Coins</th>
+                    <th class="num-col">EUR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="gift in detail.gift_breakdown.slice(0, 12)" :key="gift.gift_name">
+                    <td>{{ gift.gift_name }}</td>
+                    <td class="num-col mono">{{ fmtNum(gift.total_quantity) }}</td>
+                    <td class="num-col mono">{{ fmtNum(gift.total_coins) }}</td>
+                    <td class="num-col mono">{{ fmtEUR(gift.eur_net) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 class="ttw-detail-title">Top-Spender</h3>
+            <div v-if="!detail.top_gifters.length" class="ttw-empty">Keine Daten.</div>
+            <div v-else class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spender</th>
+                    <th class="num-col">Coins</th>
+                    <th class="num-col">EUR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="gifter in detail.top_gifters" :key="gifter.sender_username">
+                    <td>{{ gifter.sender_nickname || gifter.sender_username }}</td>
+                    <td class="num-col mono">{{ fmtNum(gifter.total_coins) }}</td>
+                    <td class="num-col mono">{{ fmtEUR(gifter.eur_net) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="ttw-detail-title">Sessions</h3>
+        <div v-if="!detail.sessions.length" class="ttw-empty">Keine Sessions.</div>
+        <div v-else class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Start</th>
+                <th>Ende</th>
+                <th>Status</th>
+                <th class="num-col">Peak</th>
+                <th class="num-col">Diamonds</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="session in detail.sessions" :key="session.id">
+                <td class="mono">{{ fmtDate(session.started_at) }}</td>
+                <td class="mono">{{ fmtDate(session.ended_at) }}</td>
+                <td>{{ session.status || '–' }}</td>
+                <td class="num-col mono">{{ fmtNum(session.peak_viewers) }}</td>
+                <td class="num-col mono">{{ fmtNum(session.diamonds_collected) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <template #footer>
+        <button type="button" class="sm" @click="detailOpen = false">Schließen</button>
+      </template>
+    </ModalDialog>
   </div>
 </template>
