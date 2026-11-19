@@ -55,6 +55,18 @@ describe('permissions', () => {
       allowed: true,
       permissions: ['gifts.book'],
     });
+    expect(resolveProxyPolicy('GET', '/api/system/status')).toMatchObject({
+      allowed: true,
+      permissions: ['system.view'],
+    });
+    expect(resolveProxyPolicy('POST', '/api/v1/telegram/send-report')).toMatchObject({
+      allowed: true,
+      permissions: ['reports.send'],
+    });
+    expect(resolveProxyPolicy('GET', '/api/v1/reports/daily')).toMatchObject({
+      allowed: true,
+      permissions: [PERM_ANALYTICS_VIEW],
+    });
   });
 
   it('disables auth and legacy mini-app routes', () => {

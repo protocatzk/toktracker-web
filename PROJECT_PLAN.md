@@ -98,29 +98,29 @@ Default-Deny. Jeder erlaubte Pfad braucht eine Regel in
 | Feature | Endpunkte | Status |
 |---|---|---|
 | Übersicht/KPIs | `GET /api/overview?period=` | ✅ |
-| Streamer-Liste/Detail | `GET /api/streamers/:id` | ⏳ |
-| Streamer anlegen/löschen | `POST/DELETE /api/streamers` | ⏳ |
-| Tracking/Refresh | `POST /api/streamers/:id/track`, `/refresh` | ⏳ |
-| Gruppen | `GET/POST/PUT/DELETE /api/streamer-groups` | ⏳ |
-| Gruppenmitglieder | `PUT /api/streamer-groups/:id/members` | ⏳ |
-| Worker-Diagnose | `GET /api/system/status` | ⏳ |
-| Analytics/Charts | `GET /api/analytics` | ⏳ |
-| Battles | `GET /api/battles`, `/stats`, `/:id` | ⏳ |
-| Gifts buchen | `POST /api/gifts` | ⏳ |
-| Telegram-Nutzer | `GET/POST/PUT/DELETE /api/telegram/users*` | ⏳ |
-| Einstellungen | `GET/POST /api/settings` | ⏳ |
-| System/Demo | `GET /api/system/health`, `POST /api/demo/*` | ⏳ |
-| Exporte | `GET /api/export/*.csv` | ⏳ |
-| Reports | `POST /api/v1/telegram/send-report` | ⏳ |
-| Revenue-Profile | `GET/POST /api/revenue/profiles*` | ⏳ |
+| Streamer-Liste/Detail | `GET /api/streamers/:id` | ✅ |
+| Streamer anlegen/löschen | `POST/DELETE /api/streamers` | ✅ |
+| Tracking/Refresh | `POST /api/streamers/:id/track`, `/refresh` | ✅ |
+| Gruppen | `GET/POST/PUT/DELETE /api/streamer-groups` | ✅ |
+| Gruppenmitglieder | `PUT /api/streamer-groups/:id/members` | ✅ |
+| Worker-Diagnose | `GET /api/system/status` | ✅ |
+| Analytics/Charts | `GET /api/analytics` | ✅ |
+| Battles | `GET /api/battles`, `/stats`, `/:id` | ✅ |
+| Gifts buchen | `POST /api/gifts` | ✅ |
+| Telegram-Nutzer | `GET/POST/PUT/DELETE /api/telegram/users*` | ✅ |
+| Einstellungen | `GET/POST /api/settings` | ✅ |
+| System/Demo | `GET /api/system/health`, `POST /api/demo/*` | ✅ |
+| Exporte | `GET /api/export/*.csv` | ✅ |
+| Reports | `POST /api/v1/telegram/send-report` | ✅ |
+| Revenue-Profile | `GET/POST /api/revenue/profiles*` | ✅ |
 
 ### 5.2 Stats (`/stats`)
 
-`GET /api/overview`, `GET /api/analytics`, `GET /api/battles/stats` – ⏳
+`GET /api/overview`, `GET /api/analytics`, `GET /api/battles/stats` – ✅
 
 ### 5.3 Access (`/access`)
 
-`GET/POST/PUT/DELETE /api/telegram/users*`, `GET/POST /api/settings` – ⏳  
+`GET/POST/PUT/DELETE /api/telegram/users*`, `GET/POST /api/settings` – ✅  
 Zusätzlich lokale BFF-Benutzer unter `/users`.
 
 ### 5.4 Donor Radar (`/donor-radar`)
@@ -128,21 +128,21 @@ Zusätzlich lokale BFF-Benutzer unter `/users`.
 `GET /api/donor-radar`, `/donors/:username`, `/whale-alerts`,
 `/loyalty-and-overlap`, `GET /api/chat-logs`,
 `POST /api/donor-radar/donors/:username/crm`,
-`POST /api/donor-radar/donors/:username/toggle-vip` – ⏳
+`POST /api/donor-radar/donors/:username/toggle-vip` – ✅
 
 ### 5.5 Chat Intelligence (`/chat-intelligence`)
 
 `GET /api/chat-intelligence/sessions`, `/analysis`, `/export`,
-`GET /api/chat-logs` – ⏳
+`GET /api/chat-logs` – ✅
 
 ### 5.6 Site Analytics (`/site-analytics`)
 
-`GET /api/site-analytics`, `/api-calls` – ⏳
+`GET /api/site-analytics`, `/api-calls` – ✅
 
 ### 5.7 Public Panel (`/public`)
 
 `GET /api/public/overview`, `/streamers/:id`, `/battles`, `/battles/stats`,
-`/analytics` – ⏳  
+`/analytics` – ✅  
 Die Route ist im Frontend ohne Login erreichbar; der BFF erlaubt die
 Public-Endpunkte ohne Session.
 
@@ -156,14 +156,14 @@ Nicht Bestandteil der ersten Parität: Legacy, eingefroren, eigene
 | Meilenstein | Inhalt |
 |---|---|
 | M0 – Fundament | ✅ Projekt, BFF, Auth, Rollen, Proxy, Dashboard-Übersicht |
-| M1 – Streamer | Streamer-CRUD, Gruppen, Worker-Diagnose, Detailansicht |
-| M2 – Analytics | Charts, Zeitverläufe, Battles, Gifts, Exporte |
-| M3 – Access | Telegram-Whitelist, Rollen, lokale Benutzerverwaltung |
-| M4 – Radar | Donor-Radar, Whale-Alerts, CRM, Chatlogs |
-| M5 – Chat-Intel | Sessions, Analyse, Export |
-| M6 – Site-Analytics | Traffic, API-Calls, Bot-Sessions |
-| M7 – Public Panel | Öffentliche Ansicht + Stats |
-| M8 – Härtung | E2E-Tests, Security-Review, Docker/Deployment, Doku |
+| M1 – Streamer | ✅ Streamer-CRUD, Gruppen, Worker-Diagnose, Detailansicht |
+| M2 – Analytics | ✅ Charts, Zeitverläufe, Battles, Gifts, Exporte |
+| M3 – Access | ✅ Telegram-Whitelist, Rollen, lokale Benutzerverwaltung |
+| M4 – Radar | ✅ Donor-Radar, Whale-Alerts, CRM, Chatlogs |
+| M5 – Chat-Intel | ✅ Sessions, Analyse, Export |
+| M6 – Site-Analytics | ✅ Traffic, API-Calls, Bot-Sessions |
+| M7 – Public Panel | ✅ Öffentliche Ansicht + Stats |
+| M8 – Härtung | ⏳ E2E-Tests, Security-Review, Docker/Deployment, Doku |
 
 ## 7. Teststrategie
 

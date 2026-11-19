@@ -104,13 +104,16 @@ Endpunkte aufrufen.
 
 - [x] Projektgerüst, BFF, Login, Rollen, Proxy
 - [x] Dashboard-Übersicht (`/api/overview`)
-- [ ] Streamer/Gruppen/Worker
-- [ ] Analytics, Battles, Gifts
-- [ ] Telegram-Whitelist, Settings, System
-- [ ] Stats, Access, Donor-Radar, Chat-Intelligence, Site-Analytics
-- [ ] Public Panel
-- [ ] Exporte/Reports
+- [x] Streamer, Gruppen und Worker-Diagnose
+- [x] Analytics/Charts, Stats, Battles und Gifts
+- [x] Telegram-Whitelist, Settings, System und lokale Benutzer
+- [x] Donor-Radar, Chat-Intelligence, Site-Analytics
+- [x] Public Panel (Leaderboard, Battles, Analytics, Gifts, Bot)
+- [x] Exporte und 24h-Report-Versand
 - [ ] E2E-Tests und Deployment-Feinschliff
+
+Die **Telegram Mini-App** ist bewusst nicht Teil der ersten Parität: Sie ist
+Legacy, nutzt `initData`-Auth und würde ein separates WebApp-Projekt erfordern.
 
 Die vollständige Modul-/Endpunkt-Matrix und Meilensteine stehen in
 [`PROJECT_PLAN.md`](./PROJECT_PLAN.md).

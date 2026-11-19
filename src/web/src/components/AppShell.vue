@@ -14,12 +14,16 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'dashboard', label: 'Dashboard', icon: '▦', permission: 'analytics.view' },
+  { name: 'streamers', label: 'Streamer', icon: '◉', permission: 'analytics.view' },
   { name: 'stats', label: 'Statistiken', icon: '◫', permission: 'analytics.view' },
+  { name: 'battles', label: 'Battles', icon: '⚔', permission: 'analytics.view' },
+  { name: 'gifts', label: 'Geschenke', icon: '◈', permission: 'gifts.book' },
   { name: 'donor-radar', label: 'Spender-Radar', icon: '◎', permission: 'radar.view' },
   { name: 'chat-intelligence', label: 'Chat-Intel', icon: '◌', permission: 'chatintel.view' },
   { name: 'site-analytics', label: 'Site-Analytics', icon: '⌁', permission: 'analytics.view' },
   { name: 'access', label: 'Zugriff & Rollen', icon: '⚿', permission: 'users.manage' },
   { name: 'users', label: 'Lokale Benutzer', icon: '☷', permission: 'users.manage' },
+  { name: 'system', label: 'System', icon: '⌂', permission: 'system.view' },
   { name: 'settings', label: 'Einstellungen', icon: '⚙', permission: 'settings.manage' },
   { name: 'public-panel', label: 'Public Panel', icon: '↗', permission: 'public.view' },
 ];
@@ -31,7 +35,12 @@ const route = useRoute();
 const router = useRouter();
 const sidebarOpen = ref(false);
 
-const visibleNav = computed(() => navItems.filter((item) => auth.can(item.permission)));
+const visibleNav = computed(() =>
+  navItems.filter((item) => {
+    if (!auth.user && item.name === 'public-panel') return true;
+    return auth.can(item.permission);
+  }),
+);
 const title = computed(() => (route.meta.title as string | undefined) ?? 'TokTracker');
 const initials = computed(() => (auth.user?.username ?? '?').slice(0, 2).toUpperCase());
 

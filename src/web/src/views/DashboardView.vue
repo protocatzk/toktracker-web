@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { apiGet } from '@/api/client';
-import type { DashboardOverview, StreamerOverview } from '@/api/types';
+import type { DashboardOverview, GroupsResponse, StreamerGroup, StreamerOverview } from '@/api/types';
 import StatCard from '@/components/StatCard.vue';
 import { useToastStore } from '@/stores/toast';
 import { fmtDate, fmtEUR, fmtNum, fmtUSD } from '@/utils/format';
 
 const period = ref('24h');
+const groupId = ref('');
+const groups = ref<StreamerGroup[]>([]);
 const data = ref<DashboardOverview | null>(null);
 const loading = ref(false);
 const error = ref('');
@@ -35,9 +37,14 @@ async function load(silent = false): Promise<void> {
   if (!silent) loading.value = true;
   error.value = '';
   try {
-    data.value = await apiGet<DashboardOverview>(
-      `/api/overview?period=${encodeURIComponent(period.value)}`,
-    );
+    const params = new URLSearchParams({ period: period.value });
+    if (groupId.value) params.set('group_id', groupId.value);
+    const [overviewPayload, groupsPayload] = await Promise.all([
+      apiGet<DashboardOverview>(`/api/overview?${params.toString()}`),
+      apiGet<GroupsResponse>('/api/streamer-groups'),
+    ]);
+    data.value = overviewPayload;
+    groups.value = groupsPayload.groups;
     lastUpdated.value = new Date();
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : 'Dashboard konnte nicht geladen werden.';
@@ -78,7 +85,7 @@ function refresh(): void {
   void load();
 }
 
-watch(period, () => {
+watch([period, groupId], () => {
   void load();
 });
 
@@ -110,11 +117,17 @@ onBeforeUnmount(stopTimer);
             {{ option.label }}
           </option>
         </select>
+        <select v-model="groupId" aria-label="Gruppe">
+          <option value="">Alle Gruppen</option>
+          <option v-for="group in groups" :key="group.id" :value="String(group.id)">
+            {{ group.name }}
+          </option>
+        </select>
         <button type="button" :disabled="loading" @click="refresh">
           {{ loading ? 'Lädt…' : 'Aktualisieren' }}
         </button>
-        <a class="btn-link" href="/api/export/gifts.csv">Gifts CSV</a>
-        <a class="btn-link" href="/api/export/battles.csv">Battles CSV</a>
+        <a class="btn-link" :href="`/api/export/gifts.csv${groupId ? `?group_id=${groupId}` : ''}`">Gifts CSV</a>
+        <a class="btn-link" :href="`/api/export/battles.csv${groupId ? `?group_id=${groupId}` : ''}`">Battles CSV</a>
       </div>
     </div>
 

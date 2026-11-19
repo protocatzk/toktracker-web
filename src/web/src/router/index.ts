@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import DashboardView from '@/views/DashboardView.vue';
+import StreamersView from '@/views/StreamersView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ForbiddenView from '@/views/ForbiddenView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import StatsView from '@/views/StatsView.vue';
+import BattlesView from '@/views/BattlesView.vue';
+import GiftsView from '@/views/GiftsView.vue';
+import SystemView from '@/views/SystemView.vue';
 import AccessView from '@/views/AccessView.vue';
 import UsersView from '@/views/UsersView.vue';
 import DonorRadarView from '@/views/DonorRadarView.vue';
@@ -27,10 +31,28 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Dashboard', requiresAuth: true, permission: 'analytics.view' },
   },
   {
+    path: '/streamers',
+    name: 'streamers',
+    component: StreamersView,
+    meta: { title: 'Streamer & Gruppen', requiresAuth: true, permission: 'analytics.view' },
+  },
+  {
     path: '/stats',
     name: 'stats',
     component: StatsView,
     meta: { title: 'Statistiken', requiresAuth: true, permission: 'analytics.view' },
+  },
+  {
+    path: '/battles',
+    name: 'battles',
+    component: BattlesView,
+    meta: { title: 'Battles', requiresAuth: true, permission: 'analytics.view' },
+  },
+  {
+    path: '/gifts',
+    name: 'gifts',
+    component: GiftsView,
+    meta: { title: 'Geschenke', requiresAuth: true, permission: 'gifts.book' },
   },
   {
     path: '/donor-radar',
@@ -61,6 +83,12 @@ const routes: RouteRecordRaw[] = [
     name: 'users',
     component: UsersView,
     meta: { title: 'Lokale Benutzer', requiresAuth: true, permission: 'users.manage' },
+  },
+  {
+    path: '/system',
+    name: 'system',
+    component: SystemView,
+    meta: { title: 'System & Worker', requiresAuth: true, permission: 'system.view' },
   },
   {
     path: '/settings',
