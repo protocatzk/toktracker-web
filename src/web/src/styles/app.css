@@ -1434,6 +1434,16 @@ tr.is-muted td {
 }
 
 /* --------------------------------------------------------------------------
+   Modals
+   donor_radar.css setzt .modal-overlay auf display:none (Legacy-Seite).
+   Unsere Vue-Modals werden per v-if gerendert und müssen sichtbar sein.
+   -------------------------------------------------------------------------- */
+
+.modal-overlay {
+  display: flex;
+}
+
+/* --------------------------------------------------------------------------
    Toasts
    -------------------------------------------------------------------------- */
 
