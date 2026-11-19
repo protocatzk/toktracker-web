@@ -1,0 +1,196 @@
+/* TT-INTELLIGENCE – Zugriff, Whitelist & Rollen (/access) */
+
+.access-hero {
+    border-top: 2px solid var(--module-access);
+}
+
+.access-mode-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.access-mode-row select {
+    min-width: min(320px, 100%);
+    max-width: 100%;
+}
+
+.access-summary {
+    margin-bottom: var(--space-4);
+}
+
+.access-add-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.access-add-form input {
+    flex: 1 1 220px;
+    min-width: min(220px, 100%);
+    max-width: 100%;
+}
+
+.access-add-form select {
+    flex: 1 1 320px;
+    max-width: 100%;
+}
+
+.access-matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+}
+
+.access-subtitle {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.access-matrix th,
+.access-matrix td {
+    padding: 7px 9px;
+    font-size: 12px;
+}
+
+.access-matrix td.num-col {
+    color: var(--text-strong);
+    font-weight: 700;
+    text-align: center;
+}
+
+.access-perm-key {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+}
+
+.access-toast {
+    display: none;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 80;
+    max-width: 380px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-strong);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+    color: var(--text);
+    font-size: 12.5px;
+}
+
+.access-toast.show {
+    display: block;
+}
+
+.access-toast.error {
+    border-left-color: var(--danger);
+    color: var(--danger);
+}
+
+.access-empty {
+    color: var(--muted);
+    font-size: 12.5px;
+}
+
+.access-dialog {
+    width: min(900px, calc(100vw - 2 * var(--space-4)));
+    max-height: min(88vh, 900px);
+    padding: 0;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-md);
+}
+
+.access-dialog::backdrop {
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+}
+
+.access-dialog-card {
+    display: flex;
+    flex-direction: column;
+    max-height: min(88vh, 900px);
+}
+
+.access-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border);
+}
+
+.access-dialog-header h2 {
+    margin: 2px 0 0;
+}
+
+.access-permission-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+}
+
+.access-permission-body {
+    overflow-y: auto;
+    padding: var(--space-4);
+}
+
+.access-permission-body .access-subtitle {
+    margin-top: var(--space-2);
+}
+
+.access-permission-table select {
+    min-width: 150px;
+    max-width: 100%;
+}
+
+.access-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 700px) {
+    .access-dialog {
+        width: calc(100vw - 2 * var(--space-2));
+    }
+
+    .access-dialog-header {
+        flex-direction: column;
+    }
+
+    .access-permission-table select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .access-mode-row select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .access-add-form input,
+    .access-add-form select {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+}

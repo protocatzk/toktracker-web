@@ -1,0 +1,14 @@
+TokTracker-Web
+==============
+
+Dieses Projekt ist ein eigenständiges, externes Frontend für TT-INTELLIGENCE
+(protocatzk/toktracker).
+
+Teile des visuellen Design-Systems (CSS-Tokens, Komponenten-Klassen, lokale
+Inter-/JetBrains-Mono-Fonts) stammen aus dem TokTracker-Repository und werden
+unter der MIT-Lizenz verwendet:
+
+  https://github.com/protocatzk/toktracker
+  Copyright (c) Proto / protocatzk
+
+Die MIT-Lizenz liegt in der Datei LICENSE.

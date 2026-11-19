@@ -1,0 +1,131 @@
+# TokTracker-Web
+
+Externes Web-Frontend für **TT-INTELLIGENCE / TokTracker** – als eigenständiges
+Projekt, ohne Änderungen am TokTracker-Backend.
+
+- **Frontend:** Vue 3 + Vite + TypeScript
+- **BFF:** Fastify (Node.js) mit eigenem Login, Rollen und API-Key-Proxy
+- **Upstream:** `https://positronium.dev/track/api`
+- **Design:** an das bestehende TokTracker-Dashboard angelehnt
+
+## Warum ein BFF?
+
+Die TokTracker-API ist nicht für direkte Browser-Aufrufe von fremden Origins
+geeignet:
+
+- `ACCESS_GATE=whitelist` schützt auch `/api/public/*`.
+- Das Session-Cookie ist `HttpOnly` und `SameSite=Lax`.
+- Es gibt keine CORS-Header.
+- Der API-Key (`X-API-Key`) hat **Admin-Rechte** und darf nie im Browser landen.
+
+Der BFF löst das: Er läuft unter derselben Origin wie die SPA, hält den
+API-Key serverseitig, setzt die Rechte-Matrix durch und proxyt nur freigegebene
+Endpunkte.
+
+```text
+Browser ──► Vue-SPA ──► Fastify-BFF ──► TokTracker-API
+                         │  X-API-Key
+                         ├─ lokale Benutzer (data/users.json)
+                         └─ signiertes Session-Cookie
+```
+
+## Quickstart
+
+Voraussetzungen: Node.js ≥ 20.19, npm.
+
+```bash
+npm ci
+cp .env.example .env
+# TOKTRACKER_API_KEY setzen (aus der TokTracker-.env: TIKTOK_API_KEY)
+# SESSION_SECRET mit `openssl rand -hex 32` setzen
+npm run dev        # BFF auf http://localhost:3000
+npm run dev:web    # Vite auf http://localhost:5173
+```
+
+Beim ersten Start wird ein lokaler Administrator angelegt:
+
+- Benutzername: `ADMIN_USERNAME` (Default `admin`)
+- Passwort: `ADMIN_PASSWORD`, falls gesetzt – sonst wird ein Einmal-Passwort
+  generiert und im BFF-Log ausgegeben.
+
+Danach unter `http://localhost:5173/login` anmelden.
+
+> Auf diesem VPS muss Node mit `LD_LIBRARY_PATH=/home/restreamer/.local/lib`
+> ausgeführt werden, sonst fehlt `libatomic.so.1`.
+
+## Konfiguration
+
+| Variable | Bedeutung |
+|---|---|
+| `APP_ORIGIN` | Erlaubte Origin(s) der SPA, kommagetrennt. Dev: `http://localhost:5173`. |
+| `SESSION_SECRET` | Signiert das Session-Cookie. In Produktion Pflicht (≥ 32 Zeichen). |
+| `COOKIE_SECURE` | `true` bei HTTPS. Wird sonst automatisch aus `APP_ORIGIN`/`NODE_ENV` abgeleitet. |
+| `TOKTRACKER_API_BASE` | Basis-URL der TokTracker-API. |
+| `TOKTRACKER_API_KEY` | Admin-API-Key aus TokTracker (`TIKTOK_API_KEY`). Nur serverseitig! |
+| `DATA_DIR` | Verzeichnis für `users.json` und das generierte Session-Secret. |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Initialer lokaler Admin (nur beim ersten Start). |
+| `LOGIN_RATE_MAX` / `LOGIN_RATE_WINDOW` | Rate-Limit für `/auth/login`. |
+
+## Produktion
+
+```bash
+npm run build
+NODE_ENV=production SESSION_SECRET=... TOKTRACKER_API_KEY=... \
+  npm start
+```
+
+Oder mit Docker:
+
+```bash
+cp .env.example .env   # Werte setzen
+docker compose up -d --build
+```
+
+Der Container lauscht auf Port `3000` und liefert die gebaute SPA aus
+`dist/web` sowie die BFF-Routen aus.
+
+## Rollen
+
+Die lokalen BFF-Benutzer haben eine der Rollen `viewer`, `user`, `moderator`
+oder `admin`. Die Capabilities spiegeln die TokTracker-Matrix:
+
+| Rolle | Rechte |
+|---|---|
+| `viewer` | öffentliche Ansicht |
+| `user` | + Spender-Radar & Chat-Intelligence |
+| `moderator` | + Analytics, Exporte, Systemstatus |
+| `admin` | alles inkl. Streamer-, Nutzer- und Systemverwaltung |
+
+Die Rolle `admin` wird über den API-Key technisch immer alle Upstream-Rechte
+haben. Der BFF verhindert jedoch, dass Nicht-Admins die entsprechenden
+Endpunkte aufrufen.
+
+## Status
+
+- [x] Projektgerüst, BFF, Login, Rollen, Proxy
+- [x] Dashboard-Übersicht (`/api/overview`)
+- [ ] Streamer/Gruppen/Worker
+- [ ] Analytics, Battles, Gifts
+- [ ] Telegram-Whitelist, Settings, System
+- [ ] Stats, Access, Donor-Radar, Chat-Intelligence, Site-Analytics
+- [ ] Public Panel
+- [ ] Exporte/Reports
+- [ ] E2E-Tests und Deployment-Feinschliff
+
+Die vollständige Modul-/Endpunkt-Matrix und Meilensteine stehen in
+[`PROJECT_PLAN.md`](./PROJECT_PLAN.md).
+
+## Sicherheit
+
+- Der TokTracker-API-Key wird **nie** an den Browser gesendet.
+- Session-Cookie: `HttpOnly`, `SameSite=Lax`, signiert, `Secure` bei HTTPS.
+- Schreibende Requests werden zusätzlich per `Origin`-Header geprüft.
+- Unbekannte Proxy-Pfade werden blockiert (Default-Deny).
+- Login ist rate-limitiert.
+- `data/` und `.env` sind nicht versioniert.
+
+## Lizenz & Attribution
+
+MIT. Das visuelle Design-System und die lokalen Fonts sind aus
+[`protocatzk/toktracker`](https://github.com/protocatzk/toktracker)
+übernommen (MIT). Siehe [`NOTICE`](./NOTICE).
