@@ -1,0 +1,21 @@
+# Vorlage für den externen Betrieb hinter nginx-proxy + acme-companion.
+# Kopieren nach docker-compose.override.yml und Domain/E-Mail anpassen:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+services:
+  toktracker-web:
+    environment:
+      NODE_ENV: production
+      TRUST_PROXY: "true"
+      APP_ORIGIN: https://web.example.com
+      COOKIE_SECURE: "true"
+      VIRTUAL_HOST: web.example.com
+      VIRTUAL_PORT: "3000"
+      LETSENCRYPT_HOST: web.example.com
+      LETSENCRYPT_EMAIL: admin@example.com
+    networks:
+      - default
+      - toktrackerapp_toktracker_net
+
+networks:
+  toktrackerapp_toktracker_net:
+    external: true

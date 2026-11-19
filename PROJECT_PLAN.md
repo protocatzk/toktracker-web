@@ -186,7 +186,9 @@ Nicht Bestandteil der ersten Parität: Legacy, eingefroren, eigene
 
 ## 9. Offene Punkte
 
-- Ziel-Domain/Hosting (eigener Container, Reverse-Proxy, TLS).
+- ✅ Ziel-Domain/Hosting: `https://web.positronium.dev` hinter nginx-proxy +
+  acme-companion, Let's-Encrypt-Zertifikat aktiv.
 - Ob das Public Panel wirklich ohne Login erreichbar sein soll.
 - Ob die Telegram-Mini-App langfristig ersetzt werden soll.
 - Ob später doch ein scoped API-Key/Token im TokTracker-Backend ergänzt wird.
+- E2E-Tests und Deployment-Feinschliff (M8).

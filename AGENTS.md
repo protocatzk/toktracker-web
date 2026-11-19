@@ -25,6 +25,23 @@ npm start          # dist/server/index.js
 Auf diesem VPS muss Node mit `LD_LIBRARY_PATH=/home/restreamer/.local/lib`
 laufen, sonst fehlt `libatomic.so.1`.
 
+## Deployment
+
+Produktiv läuft die App unter **https://web.positronium.dev** hinter
+`nginx-proxy` + `acme-companion` (Let's Encrypt):
+
+```bash
+docker compose up -d --build
+docker compose ps
+curl -fsS https://web.positronium.dev/health
+```
+
+- Externes Proxy-Netz: `toktrackerapp_toktracker_net`
+- Container-interner Port: `3000`
+- Lokaler Debug-Port: `127.0.0.1:3001`
+- Domain/TLS/Produktions-Env: `docker-compose.override.yml`
+- DNS: `web.positronium.dev A 62.171.160.32`
+
 ## Architektur
 
 ```

@@ -81,8 +81,58 @@ cp .env.example .env   # Werte setzen
 docker compose up -d --build
 ```
 
-Der Container lauscht auf Port `3000` und liefert die gebaute SPA aus
+Der Container lauscht intern auf Port `3000` und liefert die gebaute SPA aus
 `dist/web` sowie die BFF-Routen aus.
+
+## Deployment unter `web.positronium.dev`
+
+Das Projekt läuft hinter dem bestehenden **nginx-proxy + acme-companion** auf
+dem VPS. Die Domain zeigt auf `62.171.160.32`; das Let's-Encrypt-Zertifikat
+wird automatisch ausgestellt und verlängert.
+
+```text
+Internet → nginx-proxy :443 → toktracker-web:3000 (Docker-Netz)
+```
+
+Relevante Dateien:
+
+- `docker-compose.override.yml` – Domain, TLS, Proxy-Netz, Produktions-Env
+- `docker-compose.yml` – interner Port `3000`, lokaler Debug-Port `3001`
+  (nur `127.0.0.1`)
+- externes Docker-Netz: `toktrackerapp_toktracker_net`
+
+Aktivieren/aktualisieren:
+
+```bash
+docker compose up -d --build
+docker compose ps
+curl -fsS https://web.positronium.dev/health
+```
+
+Wichtige Werte in `.env`:
+
+| Variable | Wert / Bedeutung |
+|---|---|
+| `TOKTRACKER_API_KEY` | Admin-API-Key aus TokTracker (`TIKTOK_API_KEY`) |
+| `SESSION_SECRET` | ≥ 32 Zeichen; erzeugt signierte Cookies |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | initialer lokaler Admin |
+| `WEB_PORT` | optionaler lokaler Debug-Port (Default `3001`) |
+
+Das Override setzt zusätzlich:
+
+```text
+NODE_ENV=production
+TRUST_PROXY=true
+APP_ORIGIN=https://web.positronium.dev
+COOKIE_SECURE=true
+VIRTUAL_HOST=web.positronium.dev
+VIRTUAL_PORT=3000
+LETSENCRYPT_HOST=web.positronium.dev
+LETSENCRYPT_EMAIL=admin@heliac.dev
+```
+
+HTTP wird automatisch auf HTTPS umgeleitet. Der Port `3000` bleibt intern;
+nach außen ist nur `80/443` des nginx-proxy erreichbar.
 
 ## Rollen
 

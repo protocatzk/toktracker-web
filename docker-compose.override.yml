@@ -1,0 +1,20 @@
+# Externer Betrieb hinter nginx-proxy + acme-companion.
+# DNS: web.positronium.dev muss auf diesen Server zeigen (A/AAAA).
+services:
+  toktracker-web:
+    environment:
+      NODE_ENV: production
+      TRUST_PROXY: "true"
+      APP_ORIGIN: https://web.positronium.dev
+      COOKIE_SECURE: "true"
+      VIRTUAL_HOST: web.positronium.dev
+      VIRTUAL_PORT: "3000"
+      LETSENCRYPT_HOST: web.positronium.dev
+      LETSENCRYPT_EMAIL: admin@heliac.dev
+    networks:
+      - default
+      - toktrackerapp_toktracker_net
+
+networks:
+  toktrackerapp_toktracker_net:
+    external: true
